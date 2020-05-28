@@ -10,8 +10,9 @@ module Lita
         response.reply(text.gsub("\n\n", "\n"))
       end
 
+      protect = ['aws_admin', 'aws_cli'] 
       help = { 'aws-cli [command]' => 'Execute aws-cli.' }
-      route(/aws\-cli (.+)$/, help: help, restrict_to: allow_list('cli')) do |response|
+      route(/aws\-cli (.+)$/, help: help, restrict_to: protect) do |response|
         response.reply(exec_cli(response.matches.first[0]))
       end
 

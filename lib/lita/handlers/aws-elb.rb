@@ -2,8 +2,9 @@ module Lita
   module Handlers
     class AwsElbHandler < AwsBaseHandler
 
+      protect = ['aws_admin', 'aws_elb', 'aws_elb_describe']
       help = { 'aws elbs[ --profile NAME]' => 'List all ELB.' }
-      route(/aws elbs[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
+      route(/aws elbs[ ]*(.*)$/, help: help, restrict_to: protect) do |response|
         opts = get_options(response)
         data = exec_cli_json('elb describe-load-balancers', opts)
         res = data['LoadBalancerDescriptions'].map do |elb|
@@ -17,7 +18,7 @@ module Lita
       end
 
       help = { 'aws elb {ELB name}[ --profile NAME]' => 'Show single ELB details.' }
-      route(/aws elb ([^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
+      route(/aws elb ([^ ]+)[ ]*(.*)$/, help: help, restrict_to: protect) do |response|
         opts = get_options(response)
         elb = response.matches.first[0]
         data = exec_cli_json('elb describe-load-balancers --load-balancer-names ' + elb, opts)
@@ -32,8 +33,9 @@ module Lita
         render(response, "ELB #{elb} instances:\n" + format_hash_list_with_title(:name, res))
       end
 
+      protect = ['aws_admin', 'aws_elb']
       help = { 'aws elb-remove-instance {ELB name} {Instance ID}[ --profile NAME]' => 'Remove instance from ELB' }
-      route(/aws elb\-remove\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
+      route(/aws elb\-remove\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: protect) do |response|
         opts = get_options(response)
         elb = response.matches.first[0]
         ec2 = response.matches.first[1]
@@ -42,7 +44,7 @@ module Lita
       end
 
       help = { 'aws ele-add-instance {ELB name} {Instance ID}[ --profile NAME]' => 'Attach instance to ELB.' }
-      route(/aws elb\-add\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
+      route(/aws elb\-add\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: protect) do |response|
         opts = get_options(response)
         elb = response.matches.first[0]
         ec2 = response.matches.first[1]
