@@ -3,7 +3,7 @@ module Lita
     class AwsCloudWatchHandler < AwsBaseHandler
 
       help = { 'aws ec2-memutil {instance id}[ --ago 2d][ --cal Average|SampleCount|Sum|Minimum|Maximum][ --period 300s][ --profile NAME]' => 'Show memory utilization of EC2 instance.' }
-      route(/aws ec2\-memutil ([i][\-][0-9a-zA-Z]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws ec2\-memutil ([i][\-][0-9a-zA-Z]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('cloudwatch', allowGuestRole = True)) do |response|
         opts = get_options_for_cloudwatch(response, ago: '2d', period: '300s', cal: 'Average')
         instance_id = response.matches.first.first
         cmd = "cloudwatch get-metric-statistics --namespace System/Linux --metric-name MemoryUtilization --dimensions Name=InstanceId,Value=#{instance_id} --start-time #{opts[:start_time]} --end-time #{opts[:end_time]} --period #{opts[:period]} --statistics #{opts[:cal]}"
@@ -12,7 +12,7 @@ module Lita
       end
 
       help = { 'aws ec2-cpuutil {instance id}[ --ago 2d][ --period 300s][ --profile NAME]' => 'Show CPU utilization of EC2 instance.' }
-      route(/aws ec2\-cpuutil ([i][\-][0-9a-zA-Z]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws ec2\-cpuutil ([i][\-][0-9a-zA-Z]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('cloudwatch', allowGuestRole = True)) do |response|
         opts = get_options_for_cloudwatch(response, ago: '2d', period: '300s')
         instance_id = response.matches.first.first
         cmd = "cloudwatch get-metric-statistics --namespace AWS/EC2 --metric-name CPUUtilization --dimensions Name=InstanceId,Value=#{instance_id} --start-time #{opts[:start_time]} --end-time #{opts[:end_time]} --period #{opts[:period]} --statistics Average"
@@ -21,7 +21,7 @@ module Lita
       end
 
       help = { 'aws elb-req-sum {ELB name}[ --ago 2d][ --period 300s][ --profile NAME]' => 'Show ELB request count.' }
-      route(/aws elb\-req-sum ([0-9a-zA-Z_]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws elb\-req-sum ([0-9a-zA-Z_]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('cloudwatch', allowGuestRole = True)) do |response|
         opts = get_options_for_cloudwatch(response, ago: '2d', period: '300s')
         elb_name = response.matches.first.first
         cmd = "cloudwatch get-metric-statistics --namespace AWS/ELB --metric-name RequestCount --dimensions Name=LoadBalancerName,Value=#{elb_name} --start-time #{opts[:start_time]} --end-time #{opts[:end_time]} --period #{opts[:period]} --statistics Sum"
@@ -30,7 +30,7 @@ module Lita
       end
 
       help = { 'aws rds-space {RDS Identifier}[ --profile NAME]' => 'Show RDS instance current disk space in GB.' }
-      route(/aws rds\-space ([0-9a-zA-Z_]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws rds\-space ([0-9a-zA-Z_]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('cloudwatch', allowGuestRole = True)) do |response|
         opts = get_options_for_cloudwatch(response)
         rds = response.matches.first.first
         start_time = (Time.now.utc - (12 * 60 * 60)).strftime('%Y-%m-%dT%H:00')

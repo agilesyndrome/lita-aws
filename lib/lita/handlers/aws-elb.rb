@@ -3,7 +3,7 @@ module Lita
     class AwsElbHandler < AwsBaseHandler
 
       help = { 'aws elbs[ --profile NAME]' => 'List all ELB.' }
-      route(/aws elbs[ ]*(.*)$/, help: help) do |response|
+      route(/aws elbs[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
         opts = get_options(response)
         data = exec_cli_json('elb describe-load-balancers', opts)
         res = data['LoadBalancerDescriptions'].map do |elb|
@@ -17,7 +17,7 @@ module Lita
       end
 
       help = { 'aws elb {ELB name}[ --profile NAME]' => 'Show single ELB details.' }
-      route(/aws elb ([^ ]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws elb ([^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
         opts = get_options(response)
         elb = response.matches.first[0]
         data = exec_cli_json('elb describe-load-balancers --load-balancer-names ' + elb, opts)
@@ -33,7 +33,7 @@ module Lita
       end
 
       help = { 'aws elb-remove-instance {ELB name} {Instance ID}[ --profile NAME]' => 'Remove instance from ELB' }
-      route(/aws elb\-remove\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws elb\-remove\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
         opts = get_options(response)
         elb = response.matches.first[0]
         ec2 = response.matches.first[1]
@@ -42,7 +42,7 @@ module Lita
       end
 
       help = { 'aws ele-add-instance {ELB name} {Instance ID}[ --profile NAME]' => 'Attach instance to ELB.' }
-      route(/aws elb\-add\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws elb\-add\-instance ([^ ]+)[ ]+([i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('elb')) do |response|
         opts = get_options(response)
         elb = response.matches.first[0]
         ec2 = response.matches.first[1]

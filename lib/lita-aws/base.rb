@@ -5,6 +5,20 @@ module LitaAws
 
     protected
 
+    def restrict_to(service, allowGuestRole = False)
+      groupPrefix = "aws"
+
+      allowList = [
+        `#{groupPrefix}_#{service}_manager`
+        `#{groupPrefix}_admin`
+      ]
+
+      if allowGuestRole
+        allowList.push(`#{groupPrefix}_#{service}_guest`)
+      end
+      allowList
+    end
+
     def exec_cli(cmd, opts = {})
       cmd_postfix = opts.to_a.map { |e| "--#{e.first} #{e.last}" }.join(' ')
       cmd = cmd.delete(';')

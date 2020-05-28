@@ -11,7 +11,7 @@ module Lita
       end
 
       help = { 'aws-cli [command]' => 'Execute aws-cli.' }
-      route(/aws\-cli (.+)$/, help: help) do |response|
+      route(/aws\-cli (.+)$/, help: help, restrict_to: allow_list('cli')) do |response|
         response.reply(exec_cli(response.matches.first[0]))
       end
 

@@ -3,7 +3,7 @@ module Lita
     class AwsProfile < AwsBaseHandler
 
       help = { 'aws profile' => 'list all aws profile.' }
-      route(/aws profile$/, help: help) do |response|
+      route(/aws profile$/, help: help, restrict_to: allow_list('profile') do |response|
         config_text = `cat ~/.aws/config`
         profiles = ['default'] + config_text.scan(/\[profile ([a-z0-9A-Z\-_]+)\]\n/).map(&:first)
         attrs = ['region', 'aws_access_key_id']
@@ -18,7 +18,7 @@ module Lita
       end
 
       help = { 'aws profile {name} {region} {api key} {secret key}' => 'Create or update aws profile credentials and region. If use \'default\' as name, it would set to default profile.' }
-      route(/aws profile ([a-zA-Z\-0-9]+) ([a-z\-0-9]+) ([^ ]+) ([^ ]+)/, help: help) do |response|
+      route(/aws profile ([a-zA-Z\-0-9]+) ([a-z\-0-9]+) ([^ ]+) ([^ ]+)/, help: help, restrict_to: allow_list('profile') do |response|
         name, @region, @aws_access_key_id, @aws_secret_access_key = response.matches.first
         cmd_postfix = name == 'default' ? '' : "--profile #{name}"
         ['region', 'aws_access_key_id', 'aws_secret_access_key'].each do |attr|
@@ -28,7 +28,7 @@ module Lita
       end
 
       help = { 'aws account-id[ --profile NAME]' => 'Get your aws account id.' }
-      route(/aws account\-id[ ]*(.*)$/, help: help) do |response|
+      route(/aws account\-id[ ]*(.*)$/, help: help, restrict_to: allow_list('profile', allowGuestRole=True) do |response|
         opts = get_options(response)
         render response, "Your AWS account id: #{account_id(opts)}"
       end

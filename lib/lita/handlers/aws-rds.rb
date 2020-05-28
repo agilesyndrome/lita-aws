@@ -3,7 +3,7 @@ module Lita
     class AwsRdsHandler < AwsBaseHandler
 
       help = { 'aws rdss[ --profile NAME]' => 'List all RDS.' }
-      route(/aws rdss[ ]*(.*)$/, help: help) do |response|
+      route(/aws rdss[ ]*(.*)$/, help: help, restrict_to: allow_list('rds') do |response|
         opts = get_options(response)
         data = exec_cli_json('rds describe-db-instances', opts)
         res = data['DBInstances'].map { |db| db_instance_to_hash(db) }

@@ -3,7 +3,7 @@ module Lita
     class AwsEc2 < AwsBaseHandler
 
       help = { 'aws ec2-instances[ --profile NAME]' => 'List instances on EC2.' }
-      route(/aws ec2\-instances[ ]*(.*)$/, help: help) do |response|
+      route(/aws ec2\-instances[ ]*(.*)$/, help: help, restrict_to: allow_list('ec2')) do |response|
         data = exec_cli_json('ec2 describe-instances', get_options(response))
         instances = data['Reservations'].map do |tmp|
           tmp['Instances'].map { |instance| ec2_to_hash(instance) }
@@ -12,7 +12,7 @@ module Lita
       end
 
       help = { 'aws ec2-create-ami {Instance ID} {AMI name}[ --profile NAME]' => 'Create AMI from EC2 instance.' }
-      route(/aws ec2\-create\-ami ([i][\-][^ ]+)[ ]+([^ ]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws ec2\-create\-ami ([i][\-][^ ]+)[ ]+([^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('ec2')) do |response|
         opts = get_options(response)
         instance_id = response.matches.first[0]
         ami_name = response.matches.first[1]
@@ -22,7 +22,7 @@ module Lita
       end
 
       help = { 'aws ec2-ami {AMI ID}[ --profile NAME]' => 'Show AMI detail.' }
-      route(/aws ec2\-ami ([a][m][i][\-][^ ]+)[ ]*(.*)$/, help: help) do |response|
+      route(/aws ec2\-ami ([a][m][i][\-][^ ]+)[ ]*(.*)$/, help: help, restrict_to: allow_list('ec2')) do |response|
         opts = get_options(response)
         ami_id = response.matches.first[0]
         data = exec_cli_json("ec2 describe-images --image-ids #{ami_id}", opts)
@@ -31,7 +31,7 @@ module Lita
       end
 
       help = { 'aws ec2-amis[ --profile NAME]' => 'Show AMI detail.' }
-      route(/aws ec2\-amis[ ]*(.*)$/, help: help) do |response|
+      route(/aws ec2\-amis[ ]*(.*)$/, help: help, restrict_to: allow_list('ec2')) do |response|
         opts = get_options(response)
         data = exec_cli_json("ec2 describe-images --owners #{account_id(opts)}", opts)
         data = data['Images'].map { |img| ami_to_hash(img) }
